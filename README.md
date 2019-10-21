@@ -22,9 +22,11 @@ Se busca el uso de TDD, Paradigma Orientado a Objetos y los Principios SOLID.
 
 ## Paso a paso
 
-### -1. Una breve explicación de .NET
+### 0. Una breve explicación de .NET
 
-### 0. Instalación de prerequisitos
+Como introducción tomé una presentación del [dotnet-foundation](https://presentations.dotnetfoundation.org) y las personalicé para dar los primeros pasos en .NET .
+
+Descargar presentación [¿Que es .NET?](slides/WhatIsdotNET.pptx)
 
 ### 1. Creación de Solución
 
