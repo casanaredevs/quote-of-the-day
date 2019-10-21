@@ -22,17 +22,29 @@ Se busca el uso de TDD, Paradigma Orientado a Objetos y los Principios SOLID.
 
 ## Paso a paso
 
-### 0. Una breve explicación de .NET
+### -1. Una breve explicación de .NET
 
 Como introducción tomé una presentación del [dotnet-foundation](https://presentations.dotnetfoundation.org) y las personalicé para dar los primeros pasos en .NET .
 
 Descargar presentación [¿Que es .NET?](slides/WhatIsdotNET.pptx)
 
+### 0. Creación de la estructura de carpetas
+La estructura básica del proyecto corresponde a la siguiente estructura:
+
+rootfolder
+
+-src
+
+-test
+
 ### 1. Creación de Solución
+Una solución es un elemento que nos permite agrupar proyectos.
 
-### 2 Modelos (Entities)
+    dotnet new sln -n QuoteOfTheDay
 
-### 3 Repositorio (DataAccess)
+### 2. Modelos (Entities)
 
-### 4 WebAPI
+### 3. Repositorio (DataAccess)
+
+### 4. WebAPI
 
