@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QOTD.DataAccess\QOTD.DataAccess.csproj" />
+    <ProjectReference Include="..\QOTD.Models\QOTD.Models.csproj" />
+    <ProjectReference Include="..\QOTD.Services.Contracts\QOTD.Services.Contracts.csproj" />
+    <ProjectReference Include="..\QOTD.Services.Implementation\QOTD.Services.Implementation.csproj" />
+  </ItemGroup>
+
+</Project>
