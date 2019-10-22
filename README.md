@@ -6,10 +6,10 @@ El objetivo de esta kata es conocer el funcionamiento básico de .NET y desarrol
 
 ## Contenido
 
-- [Requerimiento](Requerimiento).
-- [Prerequisitos](Prerequisitos).
-- [Paso a paso](PasoAPaso).
-- [Comandos básicos para trabajar en .NET CLI](Comandos)
+- [Requerimiento](##Requerimiento).
+- [Prerequisitos](##Prerequisitos).
+- [Paso a paso](##Paso-a-paso).
+- [Comandos básicos para trabajar en .NET CLI](##Comandos-básicos-para-trabajar-en-.NET-CLI)
 
 ## Requerimiento
 
