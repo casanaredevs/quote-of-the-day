@@ -155,6 +155,46 @@ namespace QOTD.Models
 }
 ```
 
+El modelo consiste de las siguientes:
+
+![Modelo](https://irlv0a.by.files.1drv.com/y4m1flysX2_OFpFAM9LL50OGyL0-J66Fz1_LAGupHCZjw3kqUBAHp4GIOxD6mA3L0WATy6vjpmr9GgqkHfhJQNj2RJZDBffeK3cbOJJYTota3jp_xe2Ph5V3CmGy1OejhMNqv6yaiqcGrJPBuDo_0J_00go4ygdlUDeh_1R1OeQl-3WAM1jswvWT25myLRTIQt1_SXRi-oI-0CLtDZ5ejTogA?width=477&height=176&cropmode=none)
+
+La implementación es como sigue:
+
+Categoria
+
+```csharp
+//Categoria.cs
+using System.Collections.Generic;
+namespace QOTD.Models
+{
+    public class Categoria
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; }
+        public IList<Frase> Frases { get; set; }        
+    }
+}
+```
+
+Frase
+
+```csharp
+//Frase.cs
+using System;
+namespace QOTD.Models
+{
+    public class Frase
+    {
+        public int Id { get; set; }
+        public string Texto { get; set; }
+        public string Autor { get; set; }
+        public DateTime Fecha { get; set; }
+        public Categoria Categoria { get; set; }
+    }
+}
+```
+
 ### 3. Repositorio (DataAccess)
 
 Este proyecto contendrá el Contexto (Clase que accede al origen de datos) y los Repositorios. Ejecute el siguiente comando en la carpeta
