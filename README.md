@@ -55,6 +55,9 @@ Usarémos una arquitectura sencilla, en la cual tendremos los siguientes compone
 - WebAPI. Proyecto implementado en ASPNET Core que entregará mediante REST las frases del dia y del mes.
 
 ### 1. Creación de Solución
+Una solución es un elemento que nos permite agrupar proyectos.
+
+    dotnet new sln -n QuoteOfTheDay
 
 Una solución es un elemento que nos permite agrupar proyectos.
 
