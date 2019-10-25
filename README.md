@@ -299,6 +299,81 @@ namespace QOTD.DataAccess
 }
 ```
 
+#### Implementación del Patron Repository y UnitOfWorf
+
+El código anterior funciona perfectamente con pocos modelos, ¿pero que pasa si nuestra aplicación crece a 10, 20, 100 modelos?.
+
+Para esto implementarémos los dos patrones de diseño mencionados.
+
+Cree un archivo con el nombre IRepository.cs y el siguiente código
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+
+namespace QOTD.DataAccess
+{
+    public interface IRepository<T> where T : class
+    {
+        void Add(T entity);
+        T Get(int id);
+        IEnumerable<T> GetAll();
+        IEnumerable<T> Find(Expression<Func<T, bool>> predicate);
+        int SaveChanges();
+    }
+}
+```
+
+Cree un archivo con el nombre Repository.cs y el siguiente código
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+
+namespace QOTD.DataAccess
+{
+    public class Repository<T> : IRepository<T> where T : class
+    {
+        private readonly QuoteDbContext _context;
+        protected DbSet<T> DbSet { get; }
+
+        public Repository(QuoteDbContext context)
+        {
+            this._context = context;
+            DbSet = this._context.Set<T>();
+        }
+        public void Add(T entity)
+        {
+            DbSet.Add(entity);
+        }
+
+        public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
+        {
+            return DbSet.Where(predicate);
+        }
+
+        public T Get(int id)
+        {
+            return DbSet.Find(id);
+        }
+
+        public IEnumerable<T> GetAll()
+        {
+            return DbSet.ToList();
+        }
+
+        public int SaveChanges()
+        {
+            return this._context.SaveChanges();
+        }
+    }
+}
+```
+
 
 ### 4. Servicios (Contratos e Implementación)
 
@@ -376,6 +451,7 @@ dotnet sln QuoteOfTheDay.sln add ..\test\QOTD.Test
 
  1. Arquitectura creada [commit](https://github.com/casanaredevs/quote-of-the-day/tree/f61b70b0d64a6bcd8870586cb31be13a69b9924a).
  2. Modelos creados [commit](https://github.com/casanaredevs/quote-of-the-day/tree/469779619ce7a52f563dd31b96bde8922a58a985).
- 3. Repositorio creado [commit]()
+ 3. Repositorio creado [commit](https://github.com/casanaredevs/quote-of-the-day/tree/e40fbd6c2d4a137cdd99de78d539527f83e0dbbe).
+    - Patron Repositorio Aplicado [commit](https://github.com/casanaredevs/quote-of-the-day/tree/e40fbd6c2d4a137cdd99de78d539527f83e0dbbe).
  4. Servicios creados [commit]()
  5. WebApi Creada [commit]()
