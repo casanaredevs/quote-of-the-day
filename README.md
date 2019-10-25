@@ -299,6 +299,130 @@ namespace QOTD.DataAccess
 }
 ```
 
+El Proyecto DataAccess tendrá dos elementos fundamentales:
+
+ 1. Contexto de Datos. Es una clase que funciona como intermediario con el origen de datos
+ 2. Repositorio. Es una clase que realiza las operaciones CRUD
+
+ Es requerido el uso de los siguientes paquetes
+
+ - Microsoft.EntityFrameworkCore
+ - Microsoft.EntityFrameworkCore.Relational
+ - Microsoft.EntityFrameworkCore.Sqlite (Usarémos SQLite para evitar pesadas instalaciones). EF tiene una lista de proveedores que pueden usarse [Proveedores de acceso a datos .NET](https://docs.microsoft.com/en-us/ef/core/providers/?tabs=dotnet-core-cli)
+
+ Para instalarlos puede realizarlo a traves del dotnet CLI usando el siguiente comando
+
+ ``` Console
+ dotnet add package Microsoft.EntityFrameworkCore --version 3.0.0
+ ```
+
+ O tambien copiando en el archivo .csproj la siguiente instrucción
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />
+
+Crear un archivo llamado QuoteDbContext.cs
+
+```csharp
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using QOTD.Models;
+
+namespace QOTD.DataAccess
+{
+    public class QuoteDbContext : DbContext
+    {
+        public DbSet<Frase> Frases { get; set; }
+        public DbSet<Categoria> Categorias { get; set; }
+
+        public QuoteDbContext(DbContextOptions<QuoteDbContext> options) : base(options)
+        {
+
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            //EFCore por defecto pluraliza las tablas. Con esto deshabilitamos esta opción
+            foreach (IMutableEntityType entityType in builder.Model.GetEntityTypes())
+            {
+                entityType.SetTableName(entityType.DisplayName());
+            }
+        }
+    }
+}
+```
+
+Cada objeto DbSet funciona como una "conexión" a la Base de Datos, cabe recordar que en este momento no es relevante el destino de la base de datos.
+
+Otro punto importante es notar el contenido del método OnModelCreating, las lineas al interior del ciclo realizan una configuración en el Modelo, de tal forma que el nombre de la tabla a crearse será el mismo nombre de la Clase (Entity Framework por diseño pluraliza el nombre de la tabla)
+
+Crearémos ahora los Repositorios
+
+```csharp
+using System.Collections.Generic;
+using System.Linq;
+using QOTD.Models;
+
+namespace QOTD.DataAccess
+{
+    public class FraseRepository
+    {
+        private readonly QuoteDbContext _context;
+
+        public FraseRepository(QuoteDbContext context)
+        {
+            this._context = context;
+        }
+
+        public List<Frase> Get()
+        {
+            return this._context.Frases.ToList();
+        }
+ 
+        public bool Add(Frase frase)
+        {
+            this._context.Frases.Add(frase);
+            var count = this._context.SaveChanges();
+            return count > 0;
+        }
+
+        //Se omiten los otros CRUD
+    }
+}
+```
+
+```csharp
+using System.Collections.Generic;
+using System.Linq;
+using QOTD.Models;
+
+namespace QOTD.DataAccess
+{
+    public class CategoriaRepository
+    {
+        private readonly QuoteDbContext _context;
+
+        public CategoriaRepository(QuoteDbContext context)
+        {
+            this._context = context;
+        }
+
+        public List<Categoria> Get()
+        {
+            return this._context.Categorias.ToList();
+        }
+ 
+        public bool Add(Categoria categoria)
+        {
+            this._context.Categorias.Add(categoria);
+            var count = this._context.SaveChanges();
+            return count > 0;
+        }
+
+        //Se omiten los otros CRUD
+    }
+}
+```
+
 ### 4. Servicios (Contratos e Implementación)
 
 Se crearán dos proyectos, uno contendrá los contratos y otro la implementación de los contratos.
