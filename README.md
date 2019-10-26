@@ -857,6 +857,6 @@ dotnet sln QuoteOfTheDay.sln add ..\test\QOTD.Test
  1. Arquitectura creada [commit](https://github.com/casanaredevs/quote-of-the-day/tree/f61b70b0d64a6bcd8870586cb31be13a69b9924a).
  2. Modelos creados [commit](https://github.com/casanaredevs/quote-of-the-day/tree/469779619ce7a52f563dd31b96bde8922a58a985).
  3. Repositorio creado [commit](https://github.com/casanaredevs/quote-of-the-day/tree/e40fbd6c2d4a137cdd99de78d539527f83e0dbbe).
-    - Patron Repositorio Aplicado [commit](https://github.com/casanaredevs/quote-of-the-day/tree/e40fbd6c2d4a137cdd99de78d539527f83e0dbbe).
+    - Patron Repositorio Aplicado [commit](https://github.com/casanaredevs/quote-of-the-day/tree/78c059558d57c2e91f5c1b101a7377fa9f0e0a8e).
  4. Servicios creados [commit](https://github.com/casanaredevs/quote-of-the-day/tree/bff67fd382c150c2b791ee136e37c1385d0bf83a).
  5. WebApi Creada [commit](https://github.com/casanaredevs/quote-of-the-day/tree/61f24af95c5148288c4c86b4079ae17aea750b32).
