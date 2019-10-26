@@ -16,9 +16,10 @@ namespace QOTD.DataAccess
             this._context = context;
             DbSet = this._context.Set<T>();
         }
-        public void Add(T entity)
+        public T Add(T entity)
         {
             DbSet.Add(entity);
+            return entity;
         }
 
         public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)

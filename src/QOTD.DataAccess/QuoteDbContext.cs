@@ -9,6 +9,10 @@ namespace QOTD.DataAccess
         public DbSet<Frase> Frases { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
 
+        public QuoteDbContext()
+        {
+            
+        }
         public QuoteDbContext(DbContextOptions<QuoteDbContext> options) : base(options)
         {
 

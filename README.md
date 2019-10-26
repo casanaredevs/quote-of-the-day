@@ -404,6 +404,64 @@ dotnet sln QuoteOfTheDay.sln add QOTD.Services.Contracts
 dotnet sln QuoteOfTheDay.sln add QOTD.Services.Implementation
 ```
 
+Un correcto nos lleva a definir un Contrato y una Implementación
+
+Para crear el contrato (Interface) creemos un archivo llamado IQuoteService (en el proyecto QOTD.Services.Contracts) con la siguiente implementación
+
+```csharp
+namespace QOTD.Services.Contracts
+{
+    using System;
+    using QOTD.Models;
+    using System.Collections.Generic;
+    public interface IQuoteService
+    {
+        Frase Get();
+        Frase GetByDate(DateTime day);
+        List<Frase> GetByWeek(DateTime firstDay, DateTime secondDay);
+    }
+}
+```
+
+Para definir la implementación creemos un archivo llamado QuoteService (en el proyecto QOTD.Services.Implementation) con la siguiente implementación
+
+
+```csharp 
+using System;
+using System.Collections.Generic;
+using QOTD.Models;
+using QOTD.DataAccess;
+using QOTD.Services.Contracts;
+using System.Linq;
+
+namespace QOTD.Services.Implementation
+{
+    public class QuoteService : IQuoteService
+    {
+        private readonly IRepository<Frase> _repository;
+        public QuoteService(IRepository<Frase> repository)
+        {
+            this._repository = repository;
+        }
+        public Frase Get()
+        {
+            return GetByDate(DateTime.Now);
+        }
+
+        public Frase GetByDate(DateTime day)
+        {
+            return _repository.Find(x => x.Fecha.Equals(day)).FirstOrDefault();
+        }
+
+        public List<Frase> GetByWeek(DateTime firstDay, DateTime secondDay)
+        {
+            return _repository.Find(x => x.Fecha >= firstDay && x.Fecha <= secondDay)
+                                .ToList();
+        }
+    }
+}
+```
+
 ### 5. WebAPI
 
 El proyecto WebApi es el que se encargará de escuchar y contestar las solicitudes HTTP

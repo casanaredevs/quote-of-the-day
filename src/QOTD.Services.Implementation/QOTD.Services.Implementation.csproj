@@ -2,11 +2,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QOTD.Models\QOTD.Models.csproj" />
+    <ProjectReference Include="..\QOTD.DataAccess\QOTD.DataAccess.csproj" />
     <ProjectReference Include="..\QOTD.Services.Contracts\QOTD.Services.Contracts.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
 </Project>
