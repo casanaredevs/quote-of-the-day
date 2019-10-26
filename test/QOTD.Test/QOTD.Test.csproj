@@ -16,6 +16,7 @@
   </ItemGroup>
 
    <ItemGroup>
+    <ProjectReference Include="..\..\src\QOTD.WebApi\QOTD.WebApi.csproj" />
     <ProjectReference Include="..\..\src\QOTD.DataAccess\QOTD.DataAccess.csproj" />
     <ProjectReference Include="..\..\src\QOTD.Models\QOTD.Models.csproj" />
     <ProjectReference Include="..\..\src\QOTD.Services.Contracts\QOTD.Services.Contracts.csproj" />

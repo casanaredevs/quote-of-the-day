@@ -19,6 +19,11 @@ namespace QOTD.Services.Implementation
             return GetByDate(DateTime.Now);
         }
 
+        public List<Frase> GetAll()
+        {
+            return this._repository.GetAll().ToList();
+        }
+
         public Frase GetByDate(DateTime day)
         {
             return _repository.Find(x => x.Fecha.Equals(day)).FirstOrDefault();

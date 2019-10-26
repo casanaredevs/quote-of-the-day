@@ -8,5 +8,6 @@ namespace QOTD.Services.Contracts
         Frase Get();
         Frase GetByDate(DateTime day);
         List<Frase> GetByWeek(DateTime firstDay, DateTime secondDay);
+        List<Frase> GetAll();
     }
 }

@@ -1,52 +1,4 @@
-using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
-using QOTD.Models;
-
-namespace QOTD.DataAccess
-{
-    public class QuoteDbContext : DbContext
-    {
-        public DbSet<Frase> Frases { get; set; }
-        public DbSet<Categoria> Categorias { get; set; }
-
-        public QuoteDbContext()
-        {
-
-        }
-        public QuoteDbContext(DbContextOptions<QuoteDbContext> options) : base(options)
-        {
-
-        }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            //EFCore por defecto pluraliza las tablas. Con esto deshabilitamos esta opción
-            foreach (IMutableEntityType entityType in builder.Model.GetEntityTypes())
-            {
-                entityType.SetTableName(entityType.DisplayName());
-            }
-
-            builder.Entity<Categoria>().HasData(
-                new Categoria
-                {
-                    Id = 1,
-                    Nombre = "Tecnologia"
-                },
-                new Categoria
-                {
-                    Id = 2,
-                    Nombre = "Ciencia"
-                },
-                new Categoria
-                {
-                    Id = 3,
-                    Nombre = "Fisica"
-                }
-            );
-
-            //Copiar los datos de la las Frases
-            builder.Entity<Frase>().HasData(
+ builder.Entity<Frase>().HasData(
                 new Frase {Id=1,Texto="Cualquier tecnología suficientemente avanzada es equivalente a la magia.",Autor="Sir Arthur C. Clarke.",CategoriaId=1,Fecha=new DateTime(2019,1,1)},
 new Frase {Id=2,Texto="La tecnología es un siervo útil, pero un amo peligroso.",Autor="Christian Lous Lange.",CategoriaId=1,Fecha=new DateTime(2019,1,2)},
 new Frase {Id=3,Texto="La tecnología y las redes sociales han traído el poder a la gente.",Autor="Marcos McKinnon.",CategoriaId=1,Fecha=new DateTime(2019,1,3)},
@@ -425,6 +377,3 @@ new Frase {Id=375,Texto="Me había imaginado aplicando física nuclear y la teor
 new Frase {Id=376,Texto="Algunos físicos describen la gravedad en términos de diez dimensiones, todas enrolladas. Pero esas no son palabras reales, sino solo referentes, utilizados para referirse a las partes de ecuaciones abstractas. ",Autor="Scott Adams.",CategoriaId=3,Fecha=new DateTime(2020,1,11)}
 
             );
-        }
-    }
-}

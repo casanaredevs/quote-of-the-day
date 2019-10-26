@@ -10,6 +10,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using QOTD.DataAccess;
+using Microsoft.EntityFrameworkCore.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using QOTD.Services.Contracts;
+using QOTD.Services.Implementation;
+using Microsoft.OpenApi.Models;
 
 namespace QOTD.WebApi
 {
@@ -25,6 +31,18 @@ namespace QOTD.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<QuoteDbContext>(options =>
+                 options.UseSqlite(Configuration.GetConnectionString("QuoteDbContext"),
+                 b => b.MigrationsAssembly("QOTD.WebApi")));
+
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddTransient<IQuoteService, QuoteService>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            });
+
             services.AddControllers();
         }
 
@@ -37,6 +55,16 @@ namespace QOTD.WebApi
             }
 
             app.UseHttpsRedirection();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             app.UseRouting();
 

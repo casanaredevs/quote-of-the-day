@@ -85,7 +85,7 @@ namespace QOTD.Test
 
             // Act
             var service = new QuoteService(repository);
-            var fraseDia = service.GetByWeek(new DateTime(2019, 01, 01),new DateTime(2019, 01, 07));
+            var fraseDia = service.GetByWeek(new DateTime(2019, 01, 01), new DateTime(2019, 01, 07));
 
             //Assert
             Assert.Equal(7, fraseDia.Count());

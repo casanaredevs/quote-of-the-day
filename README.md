@@ -482,12 +482,359 @@ Opcional. para agregar el proyecto a la solución puede escribir
 dotnet sln QuoteOfTheDay.sln add QOTD.WebApi
 ```
 
+Iniciarémos por configurar el sitio y generar las migraciones a la base de datos:
+
+#### Configuración de la Base de datos
+
+Para configurar una conexiòn a una base de datos debemos instalar el proveedor adecuado, en este caso, usarémos Sqlite
+
+Para hacerlo debemos escribir el archivo .csproj la siguiente instrucción
+
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.0" />
+
+O escribir el comando (ubicados en la carpeta QOTD.WebApi)
+
+``` Console
+dotnet add package Microsoft.EntityFrameworkCore.Sqlite --version 3.0.0
+```
+
+``` Console
+dotnet add package Microsoft.EntityFrameworkCore.Design
+```
+
+Posteriormente debemos configurar el archivo appsettings.Development.json, escribiendo la cadena de conexión
+
+```json
+{
+  "ConnectionStrings": {
+    "QuoteDbContext": "Data Source=QuoteDb.db;"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "System": "Information",
+      "Microsoft": "Information"
+    }
+  }
+}
+```
+
+Por ultimo debemos configurar el Startup.cs, 
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddDbContext<QuoteDbContext>(options =>
+            options.UseSqlite(Configuration.GetConnectionString("QuoteDbContext"),
+            b => b.MigrationsAssembly("QOTD.WebApi")));
+
+    services.AddControllers();
+}
+```
+
+Con esto la aplicación ya esta preparada para conectarse a la base de datos.
+
+#### Generación de la migración y actualización de la base de datos
+
+Entity Framework permite generar migraciónes, lo cual basicamente es tomar el Modelo definido y según el proveedor de base de datos seleccionado generar la estructura de base de datos adecuada.
+
+Modifiquemos el modelo para incluir una propiedad de navegación
+
+```csharp
+using System;
+
+namespace QOTD.Models
+{
+    public class Frase
+    {
+        public int Id { get; set; }
+        public string Texto { get; set; }
+        public string Autor { get; set; }
+        public DateTime Fecha { get; set; }
+        public int CategoriaId { get; set; }
+        public Categoria Categoria { get; set; }
+    }
+}
+```
+
+Para llenar nuestra base de datos con la información de inicio, para eso vamos a agregar estos datos al DbContext (QuoteDbContext)
+
+```csharp
+protected override void OnModelCreating(ModelBuilder builder)
+{
+    //EFCore por defecto pluraliza las tablas. Con esto deshabilitamos esta opción
+    foreach (IMutableEntityType entityType in builder.Model.GetEntityTypes())
+    {
+        entityType.SetTableName(entityType.DisplayName());
+    }
+
+    builder.Entity<Categoria>().HasData(
+        new Categoria
+        {
+            Id = 1,
+            Nombre = "Tecnologia"
+        },
+        new Categoria
+        {
+            Id = 2,
+            Nombre = "Ciencia"
+        },
+        new Categoria
+        {
+            Id = 3,
+            Nombre = "Fisica"
+        }
+    );
+
+    //Copiar los datos de la las Frases (Archivo Frases.txt)
+}
+```
+
+Para generar la migración debemos primero activar Entity Framework en el CLI de .NET, para hacerlo escriba
+
+``` Console
+dotnet tool install --global dotnet-ef
+```
+
+Posteriormente generar la migración con el siguiente comando
+
+``` Console
+dotnet ef migrations add InitialCreate
+```
+
+Esto agregará una carpeta Migrations al proyecto, y se almacenarán las migraciones (con cada cambio que se realice en el modelo, puede generar una nueva migracion cambiando el nombre InitialCreate por otro identitificador que considere)
+
+Actualicemos la bd
+``` Console
+dotnet ef database update
+```
+
+#### Creación del Controlador
+
+En la carpeta Controllers agregue un nuevo archivo llamado QuoteController.cs, este será el código inicial
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
+namespace QOTD.WebApi.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class QuoteController : ControllerBase
+    {
+        
+    }
+}
+```
+Los controladores deben definir acciones (métodos) quienes serán los responsables de escuchar las peticiones y responder como corresponda. Para ello creemos una acción básica que conteste las peticiones GET
+
+```csharp
+namespace QOTD.WebApi.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class QuoteController : ControllerBase
+    {
+        [HttpGet]
+        public IEnumerable<Frase> GetFrases()
+        {
+            //La magia viene aquí
+        }
+    }
+}
+```
+
+En esta acciones debemos llamar el servicio creado, para esto debemos inyectarlo en el controlador usando el motor de Inyección de Dependencias de ASPNET, para ello terminemos de configurar la clase Startup.cs
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddDbContext<QuoteDbContext>(options =>
+            options.UseSqlite(Configuration.GetConnectionString("QuoteDbContext"),
+            b => b.MigrationsAssembly("QOTD.WebApi")));
+    
+    services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+    services.AddTransient<IQuoteService, QuoteService>();
+
+    services.AddControllers();
+}
+```
+
+Estas dos lineas le indican a ASPNET que cada que alguien requiera un objeto IRepository debe materializarlo en Repository y cada vez que requiera IQuoteService debe generar un QuoteService.
+
+Con esta declaración nuestro controlador quedará de la siguiente forma
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using QOTD.Models;
+using QOTD.Services.Contracts;
+
+namespace QOTD.WebApi.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class QuoteController : ControllerBase
+    {
+        private readonly IQuoteService _quoteService;
+        public QuoteController(IQuoteService quoteService)
+        {
+            _quoteService=quoteService;
+        }
+
+        [HttpGet]
+        public IEnumerable<Frase> GetFrases()
+        {
+            return this._quoteService.GetAll();
+        }
+    }
+}
+```
+
+Agreguemos ahora los métodos restantes
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using QOTD.Models;
+using QOTD.Services.Contracts;
+
+namespace QOTD.WebApi.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class QuoteController : ControllerBase
+    {
+        private readonly IQuoteService _quoteService;
+        public QuoteController(IQuoteService quoteService)
+        {
+            _quoteService = quoteService;
+        }
+
+        [HttpGet]
+        public IEnumerable<Frase> GetFrases()
+        {
+            return this._quoteService.GetAll();
+        }
+
+        [HttpGet]
+        [Route("hoy")]
+        public Frase GetFraseDeHoy()
+        {
+            DateTime hoy=DateTime.Now.Date;
+            return this._quoteService.GetByDate(hoy);
+        }
+
+        [HttpGet]
+        [Route("semana")]
+        public IEnumerable<Frase> GetFrasesDeLaSemana()
+        {
+            var culture = System.Threading.Thread.CurrentThread.CurrentCulture;
+            var diff = DateTime.Now.DayOfWeek - culture.DateTimeFormat.FirstDayOfWeek;
+
+            if (diff < 0)
+            {
+                diff += 7;
+            }
+            var firstDay = DateTime.Now.AddDays(-diff).Date;
+            var lastDay = firstDay.AddDays(6);
+
+            return this._quoteService.GetByWeek(firstDay, lastDay);
+        }
+    }
+}
+```
+
+¿Probamos? Ejecute en una consola (en la carpeta del Proyecto)
+
+``` Console
+dotnet run
+```
+
+Con el cliente HTTP que desee ejecute un llamado a http://localhost/quote/hoy
+
+#### Punto Final - Swagger
+
+Para probar API existe una herramiente muy interesante llamada Swagger, para configurarla instale en el proyecto WebApi el siguiente paquete Swashbuckle.AspNetCore
+
+``` Console
+dotnet add package Swashbuckle.AspNetCore --version 5.0.0-rc4
+```
+
+Y agregue en el Startup las siguientes instrucciones
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddDbContext<QuoteDbContext>(options =>
+            options.UseSqlite(Configuration.GetConnectionString("QuoteDbContext"),
+            b => b.MigrationsAssembly("QOTD.WebApi")));
+
+    services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+    services.AddTransient<IQuoteService, QuoteService>();
+
+    services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    });
+
+    services.AddControllers();
+}
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+
+    app.UseHttpsRedirection();
+
+    // Enable middleware to serve generated Swagger as a JSON endpoint.
+    app.UseSwagger();
+
+    // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+    // specifying the Swagger JSON endpoint.
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    });
+
+    app.UseRouting();
+
+    app.UseAuthorization();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+    });
+}
+```
+
+Ahora vuelva a ejecutar la Aplicación (dotnet run) y abra la URL <http://localhost:500/swagger/>
+
 ### 6. Proyecto de pruebas unitarias
 
 Este proyecto tendrá acceso a todas las pruebas unitarias, este comando debe ejecutarse en la carpeta **test**
 
 ``` Console
-    dotnet new xunit -n QOTD.Test
+dotnet ef migrations add UpdateData
+```
+
+``` Console
+dotnet ef database update
 ```
 
 Agreguemos a este proyecto las referencias a los demas proyectos. Para hacerlo abra el archivo QOTD.Test.csproj y escriba antes de la etiqueta **Project**
